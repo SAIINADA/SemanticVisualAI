@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Semantic-Visual AI Framework</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f8;
+    margin:0;
+}
+
+/* TITLE */
+
+.header{
+    text-align:center;
+    padding:30px;
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* IMAGE PREVIEW */
+
+.preview-container{
+    display:flex;
+    justify-content:center;
+    margin-top:10px;
+}
+
+.image-box{
+    position:relative;
+}
+
+.image-box img{
+    max-width:240px;
+    border-radius:10px;
+}
+
+.remove-btn{
+    position:absolute;
+    top:5px;
+    right:5px;
+    background:black;
+    color:white;
+    border:none;
+    border-radius:50%;
+    width:22px;
+    height:22px;
+    cursor:pointer;
+    display:none;
+}
+
+/* CHAT BAR */
+
+.chat-bar{
+    margin:25px auto;
+    width:60%;
+    display:flex;
+    align-items:center;
+    background:white;
+    padding:10px;
+    border-radius:30px;
+    box-shadow:0px 3px 10px rgba(0,0,0,0.1);
+}
+
+.upload-btn{
+    font-size:22px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+}
+
+#fileInput{
+    display:none;
+}
+
+#textInput{
+    flex:1;
+    border:none;
+    outline:none;
+    font-size:16px;
+    padding:8px;
+}
+
+#enterBtn{
+    display:none;
+    background:black;
+    color:white;
+    border:none;
+    border-radius:50%;
+    width:36px;
+    height:36px;
+    cursor:pointer;
+}
+
+/* RESULT BOX */
+
+.result-box{
+    width:60%;
+    margin:30px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    display:none;
+    box-shadow:0px 3px 10px rgba(0,0,0,0.1);
+}
+
+/* PIE CHART FIX */
+
+.chart-container{
+    width:300px;
+    height:300px;
+    margin:auto;
+}
+
+/* FOOTER */
+
+.ticker{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:#111;
+    color:white;
+    overflow:hidden;
+    height:40px;
+    display:flex;
+    align-items:center;
+}
+
+.ticker-text{
+    white-space:nowrap;
+    display:inline-block;
+    padding-left:100%;
+    animation:scrollText 25s linear infinite;
+}
+
+@keyframes scrollText{
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+A Semantic-Visual AI Framework for Authenticity and Emotion Analysis
+</div>
+
+<!-- IMAGE PREVIEW -->
+
+<div class="preview-container">
+<div class="image-box">
+
+<button class="remove-btn" onclick="removeImage()">×</button>
+
+<img id="preview" style="display:none;">
+
+</div>
+</div>
+
+<!-- CHAT BAR -->
+
+<div class="chat-bar">
+
+<button class="upload-btn" onclick="openFile()">+</button>
+
+<input type="file" id="fileInput" accept="image/*">
+
+<input id="textInput" type="text"
+placeholder="Paste link or enter text..."
+oninput="toggleEnterButton()">
+
+<button id="enterBtn">➤</button>
+
+</div>
+
+<!-- RESULT SECTION -->
+
+<div class="result-box" id="resultBox">
+
+<h3>Analysis Result</h3>
+
+<p id="authText"></p>
+
+<p id="textEmotion"></p>
+
+<p id="faceEmotion"></p>
+
+<h4>Event Information</h4>
+
+<p id="eventType"></p>
+
+<p id="location"></p>
+
+<p id="date"></p>
+
+<p id="people"></p>
+
+<p id="cause"></p>
+
+<p id="impact"></p>
+
+<h4>Extracted Text</h4>
+
+<p id="ocrText"></p>
+
+<h4>Verification</h4>
+
+<p id="verification"></p>
+
+<p id="sources"></p>
+
+<h4>Summary</h4>
+
+<p id="summary"></p>
+
+<div class="chart-container">
+<canvas id="pieChart"></canvas>
+</div>
+
+</div>
+
+<!-- FOOTER -->
+
+<div class="ticker">
+<div class="ticker-text">
+Check Authenticity • Check Intent • Check Emotion • Explain Prediction •
+Check Authenticity • Check Intent • Check Emotion • Explain Prediction •
+</div>
+</div>
+
+<script>
+
+function openFile(){
+document.getElementById("fileInput").click();
+}
+
+document.getElementById("fileInput").addEventListener("change",function(e){
+
+const file=e.target.files[0];
+
+if(file){
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+const img=document.getElementById("preview");
+
+img.src=reader.result;
+
+img.style.display="block";
+
+document.querySelector(".remove-btn").style.display="block";
+}
+
+reader.readAsDataURL(file);
+}
+
+toggleEnterButton();
+});
+
+function removeImage(){
+
+document.getElementById("fileInput").value="";
+
+document.getElementById("preview").style.display="none";
+
+document.querySelector(".remove-btn").style.display="none";
+
+toggleEnterButton();
+}
+
+function toggleEnterButton(){
+
+const text=document.getElementById("textInput").value;
+
+const file=document.getElementById("fileInput").files.length;
+
+document.getElementById("enterBtn").style.display=
+(text.trim()!==""||file>0)?"block":"none";
+}
+
+document.getElementById("enterBtn").addEventListener("click",async function(){
+
+let formData=new FormData();
+
+let text=document.getElementById("textInput").value;
+
+let file=document.getElementById("fileInput").files[0];
+
+if(file) formData.append("image",file);
+
+if(text) formData.append("text",text);
+
+const response=await fetch("/analyze",{
+method:"POST",
+body:formData
+});
+
+const data=await response.json();
+
+document.getElementById("resultBox").style.display="block";
+
+document.getElementById("authText").innerText=
+"Authenticity: "+data.auth_label+" ("+data.real_prob+"% Real)";
+
+document.getElementById("textEmotion").innerText=
+"Text Emotion: "+data.text_emotion;
+
+document.getElementById("faceEmotion").innerText=
+"Face Emotion: "+data.face_emotion;
+
+document.getElementById("eventType").innerText=
+"Event Type: "+(data.event.type||"Unknown");
+
+document.getElementById("location").innerText=
+"Location: "+data.event.location;
+
+document.getElementById("date").innerText=
+"Date: "+data.event.date;
+
+document.getElementById("people").innerText=
+"People: "+data.event.people;
+
+document.getElementById("cause").innerText=
+"Cause: "+(data.event.cause||"Unknown");
+
+document.getElementById("impact").innerText=
+"Impact: "+(data.event.impact||"Unknown");
+
+document.getElementById("ocrText").innerText=
+data.extracted_text||"No text detected in image";
+
+document.getElementById("verification").innerText=
+data.verification_note||"";
+
+document.getElementById("sources").innerText=
+"Sources: "+(data.sources?data.sources.join(", "):"None");
+
+document.getElementById("summary").innerText=
+data.summary;
+
+const ctx=document.getElementById("pieChart");
+
+new Chart(ctx,{
+type:"pie",
+data:{
+labels:["Real","Fake"],
+datasets:[{
+data:[data.real_prob,100-data.real_prob],
+backgroundColor:["green","red"]
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
+});
+
+});
+
+</script>
+
+</body>
+</html>
