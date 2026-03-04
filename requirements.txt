@@ -1,0 +1,11 @@
+flask
+pandas
+scikit-learn
+easyocr
+spacy
+transformers
+torch
+newspaper3k
+tensorflow
+opencv-python
+numpy
